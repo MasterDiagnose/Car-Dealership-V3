@@ -1,21 +1,17 @@
-local DATASTORE_KEY = "Change" --Change this to your data name
+local DATASTORE_KEY = "TestData" --change this to your data name
 local ServerStorage = game:GetService("ServerStorage")
+local DataSave = game:GetService("DataStoreService"):GetDataStore(DATASTORE_KEY)
 
 local function saveModelToDataStore(player)
-	local dataToSave = {}
-	local SaveFolder = ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.UserId)
-
+	local SaveFolder = ServerStorage.PurchasedVehicles:FindFirstChild(player.UserId)
 	if SaveFolder then
-
-		for _, car in ipairs(ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.UserId):GetChildren()) do
-			local objData = {}
-			objData.Name = car.Name
-
-			dataToSave[car.Name] = objData
+		local dataToSave = {}
+		for _, car in ipairs(SaveFolder:GetChildren()) do
+			dataToSave[car.Name] = true
 		end
 
 		local success, errorMessage = pcall(function()
-			game:GetService("DataStoreService"):GetDataStore(DATASTORE_KEY):SetAsync(tostring(player.UserId), dataToSave)
+			DataSave:SetAsync(tostring(player.UserId), dataToSave)
 			print("Saved data for player:", player.Name)
 		end)
 
@@ -23,20 +19,21 @@ local function saveModelToDataStore(player)
 			warn("Failed to save data for player:", player.Name, errorMessage)
 		end
 	else
-		warn("Player folder not found")
+		warn("Save folder not found for player:", player.Name)
 	end
 end
 
 local function loadModelFromDataStore(player)
-	local savedData = game:GetService("DataStoreService"):GetDataStore(DATASTORE_KEY):GetAsync(tostring(player.UserId))
-
+	local savedData = DataSave:GetAsync(tostring(player.UserId))
 	if savedData then
-		for name, objData in pairs(savedData) do
-			local vehicle = ServerStorage:WaitForChild("Vehicles"):FindFirstChild(name)
+		print("Data loaded for player:", player.Name)
+		for name, _ in pairs(savedData) do
+			local vehicle = ServerStorage.Vehicles:FindFirstChild(name)
 			if vehicle then
-				local CloneVeh = vehicle:Clone()
-				CloneVeh.Parent = ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.UserId)
-				print("Loaded vehicle: "..CloneVeh.Name)
+				vehicle:Clone().Parent = ServerStorage.PurchasedVehicles:FindFirstChild(player.UserId)
+				print("Loaded:", name)
+			else
+				print("Vehicle not found:", name)
 			end
 		end
 	else
@@ -44,14 +41,11 @@ local function loadModelFromDataStore(player)
 	end
 end
 
-game.Players.PlayerRemoving:Connect(function(player)
-	saveModelToDataStore(player)
-end)
+game.Players.PlayerRemoving:Connect(saveModelToDataStore)
 
 game.Players.PlayerAdded:Connect(function(player)
-	local PlayerPurchasedVehiclesFolder = Instance.new("Folder",ServerStorage.PurchasedVehicles)
+	local PlayerPurchasedVehiclesFolder = Instance.new("Folder", ServerStorage.PurchasedVehicles)
 	PlayerPurchasedVehiclesFolder.Name = player.UserId
-
-	wait(1)
+	wait(1) -- Introduce a delay before loading data to ensure the folder is properly created
 	loadModelFromDataStore(player)
 end)
