@@ -4,7 +4,7 @@ local Currency = script.Currency.Value
 
 ReplicatedStorage.CarDealershipEvent.PurchaseEvent.OnServerEvent:Connect(function(player, VehicleName)
 	local Vehicle = ServerStorage:WaitForChild("Vehicles"):FindFirstChild(VehicleName)
-	if Vehicle and player and not ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.Name):FindFirstChild(VehicleName) then
+	if Vehicle and player and not ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.UserId):FindFirstChild(VehicleName) then
 		local Price = Vehicle:FindFirstChild("Price").Value
 		local currencyStat = player.leaderstats:FindFirstChild(Currency)
 
@@ -12,13 +12,13 @@ ReplicatedStorage.CarDealershipEvent.PurchaseEvent.OnServerEvent:Connect(functio
 			currencyStat.Value = currencyStat.Value - Price
 
 			local SaveVehicle = Vehicle:Clone()
-			SaveVehicle.Parent = ServerStorage:FindFirstChild("PurchasedVehicles"):FindFirstChild(player.Name)
+			SaveVehicle.Parent = ServerStorage:FindFirstChild("PurchasedVehicles"):FindFirstChild(player.UserId)
 
 			print(player.Name.." purchased vehicle "..Vehicle:FindFirstChild("VehicleName").Value)
 		else
 			print("Not enough currency to purchase the vehicle.")
 		end
-	elseif ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.Name):FindFirstChild(VehicleName) then
+	elseif ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.UserId):FindFirstChild(VehicleName) then
 		player.PlayerGui.DealershipUI.Frame.PurchaseVehicle.PurchaseButton.Text = "You already own the car."
 		wait(1)
 		player.PlayerGui.DealershipUI.Frame.PurchaseVehicle.PurchaseButton.Text = "Purchase"
@@ -56,7 +56,7 @@ ReplicatedStorage.CarDealershipEvent.GetCars.OnServerEvent:Connect(function(play
 	local CarListUI = CarSpawnerUI.Frame.CarList
 
 	local Template = CarSpawnerUI.Frame.Template
-	local Vehicles = ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.Name)
+	local Vehicles = ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.UserId)
 
 	if Vehicles then
 		for i, v in pairs(Vehicles:GetChildren()) do
@@ -67,7 +67,6 @@ ReplicatedStorage.CarDealershipEvent.GetCars.OnServerEvent:Connect(function(play
 				CloneTemplate.VehicleImage.Image = v.VehicleImage.Value
 				CloneTemplate.Visible = true
 				CloneTemplate.Parent = CarListUI
-				print("cloning "..v.Name)
 			end
 		end
 	end
