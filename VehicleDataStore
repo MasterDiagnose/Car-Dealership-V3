@@ -1,4 +1,4 @@
-local DATASTORE_KEY = "Change Me" --Change this to your data name
+local DATASTORE_KEY = "ChangeMe" --Change this to your data name
 local ServerStorage = game:GetService("ServerStorage")
 
 local function saveModelToDataStore(player)
@@ -17,7 +17,7 @@ local function saveModelToDataStore(player)
 	end)
 
 	if not success then
-		warn("Failed to save data:", errorMessage)
+		warn("Failed to save data for player:", player.Name, errorMessage)
 	end
 end
 
@@ -44,5 +44,6 @@ end)
 game.Players.PlayerAdded:Connect(function(player)
 	local PlayerPurchasedVehiclesFolder = Instance.new("Folder",ServerStorage.PurchasedVehicles)
 	PlayerPurchasedVehiclesFolder.Name = player.Name
+    wait(1)
 	loadModelFromDataStore(player)
 end)
