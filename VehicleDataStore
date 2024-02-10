@@ -1,0 +1,48 @@
+local DATASTORE_KEY = "Change Me" --Change this to your data name
+local ServerStorage = game:GetService("ServerStorage")
+
+local function saveModelToDataStore(player)
+	local dataToSave = {}
+
+	for _, car in ipairs(ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.Name):GetChildren()) do
+		local objData = {}
+		objData.Name = car.Name
+
+		dataToSave[car.Name] = objData
+	end
+
+	local success, errorMessage = pcall(function()
+		game:GetService("DataStoreService"):GetDataStore(DATASTORE_KEY):SetAsync(tostring(player.UserId), dataToSave)
+		print("Saved data for player:", player.Name)
+	end)
+
+	if not success then
+		warn("Failed to save data:", errorMessage)
+	end
+end
+
+local function loadModelFromDataStore(player)
+	local savedData = game:GetService("DataStoreService"):GetDataStore(DATASTORE_KEY):GetAsync(tostring(player.UserId))
+
+	if savedData then
+		for name, objData in pairs(savedData) do
+			local vehicle = ServerStorage:WaitForChild("Vehicles"):FindFirstChild(name)
+			if vehicle then
+				local CloneVeh = vehicle:Clone()
+				CloneVeh.Parent = ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.Name)
+			end
+		end
+	else
+		print("No saved data found for player:", player.Name)
+	end
+end
+
+game.Players.PlayerRemoving:Connect(function(player)
+	saveModelToDataStore(player)
+end)
+
+game.Players.PlayerAdded:Connect(function(player)
+	local PlayerPurchasedVehiclesFolder = Instance.new("Folder",ServerStorage.PurchasedVehicles)
+	PlayerPurchasedVehiclesFolder.Name = player.Name
+	loadModelFromDataStore(player)
+end)
