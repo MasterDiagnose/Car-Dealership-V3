@@ -1,0 +1,36 @@
+local ServerStorage = game:GetService("ServerStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function SpawnCar(player, modelToSpawn)
+	local character = player.Character
+
+	if character then
+        
+		if game.Workspace:FindFirstChild(player.Name.."'sCar") then
+			game.Workspace:FindFirstChild(player.Name.."'sCar"):Destroy()
+		end
+     
+		local headPosition = character:WaitForChild("Head").Position
+
+		
+		local spawnPosition = headPosition + (character.Head.CFrame.lookVector * 10) -- Adjust the distance as needed
+
+		local spawnedModel = modelToSpawn:Clone()
+		spawnedModel.Parent = game.Workspace
+		spawnedModel:SetPrimaryPartCFrame(CFrame.new(spawnPosition))
+        
+        spawnedModel.Name = player.Name.."'sCar"
+	else
+		warn("Player character not found")
+	end
+end
+
+ReplicatedStorage.CarDealershipEvent.CarSpawnEvent.OnServerEvent:Connect(function(player,VehicleName)
+	local Vehicle = ServerStorage:WaitForChild("PurchasedVehicles"):FindFirstChild(player.Name):FindFirstChild(VehicleName)
+	
+	if Vehicle then
+		SpawnCar(player, Vehicle)
+	end
+end)
+
+
