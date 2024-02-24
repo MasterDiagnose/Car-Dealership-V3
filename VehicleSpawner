@@ -33,3 +33,9 @@ ReplicatedStorage.CarDealershipEvent.CarSpawnEvent.OnServerEvent:Connect(functio
 	end
 end)
 
+game.Players.PlayerRemoving:Connect(function(player)
+	local Car = game.Workspace:FindFirstChild(player.Name.."'sCar")
+	if Car then
+		Car:Destroy()
+	end
+end)
